@@ -15,11 +15,22 @@ from dotenv import load_dotenv
 
 # --- VERIFICAÇÃO DE ADMIN ---
 async def is_admin(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    chat = update.effective_chat
     user = update.effective_user
-    member = await chat.get_member(user.id)
-    return member.status in ["administrator", "creator"]
 
+    # Se o ID estiver na lista de admins do .env, já passa
+    if user.id in ADMIN_IDS:
+        return True
+
+    # Caso contrário, verifica se é admin real do grupo
+    try:
+        chat = update.effective_chat
+        member = await chat.get_member(user.id)
+        if member.status in ["administrator", "creator"]:
+            return True
+    except Exception:
+        pass
+
+    return False
 # --- CONFIGURAÇÃO ---
 load_dotenv()
 BOT_TOKEN = os.getenv("BOT_TOKEN")
